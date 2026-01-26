@@ -6,8 +6,15 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Configure CORS to allow credentials
+const corsOptions = {
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 const serviceAccount = require("./movie_master_pro_firebase_sdk.json");
 
@@ -41,24 +48,54 @@ async function run(){
 
         //creating Users Collection post API:
         app.post('/users', async(req, res) =>{
+          console.log('POST /users endpoint called');
+          console.log('Request body:', req.body);
+          
           const newUser = req.body;
           const email = req.body.email;
           const query = {email: email};
-          const existingUser = await usersCollection.findOne(query);
-          if(existingUser){
-            return res.send({message: 'User already exists'});
+          
+          try {
+            const existingUser = await usersCollection.findOne(query);
+            console.log('Existing user check:', existingUser);
+            
+            if(existingUser){
+              console.log('User already exists');
+              return res.send({message: 'User already exists'});
+            }
+            
+            const result = await usersCollection.insertOne(newUser);
+            console.log('User inserted:', result);
+            res.send(result);
+          } catch (error) {
+            console.error('Error in /users endpoint:', error);
+            res.status(500).send({error: error.message});
           }
-          const result = await usersCollection.insertOne(newUser);
-          res.send(result);
         });
 
         //USERS GET API:
         app.get('/users', async(req, res) =>{
-          const cursor = usersCollection.find();
-          const result = await cursor.toArray();
-          res.send(result);
+          console.log('GET /users endpoint called');
+          try {
+            const cursor = usersCollection.find();
+            const result = await cursor.toArray();
+            console.log('Users fetched:', result);
+            res.send(result);
+          } catch (error) {
+            console.error('Error in GET /users:', error);
+            res.status(500).send({error: error.message});
+          }
         });
 
+        // JWT endpoint
+        app.post('/jwt', async(req, res) =>{
+          console.log('POST /jwt endpoint called');
+          console.log('Request body:', req.body);
+          const user = req.body;
+          const token = user.email; // This is a placeholder - you should implement real JWT logic
+          console.log('Token created for:', token);
+          res.send({token: token});
+        });
 
         await client.db("admin").command({ping: 1});
         console.log("Pinged your deployment. You have successfully connected to MongoDB!")
