@@ -46,6 +46,10 @@ const client = new MongoClient(uri, {
     serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
 
+app.get('/', (req, res) => {
+    res.send('Movie Master Pro Server is Running');
+});
+
 async function run() {
     try {
         const db = client.db("movieMasterDB");
@@ -196,4 +200,4 @@ async function run() {
 }
 run().catch(console.dir);
 
-// app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));
