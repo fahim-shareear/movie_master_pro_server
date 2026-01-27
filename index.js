@@ -173,7 +173,7 @@ async function run() {
             res.send(result);
         });
 
-                // GET: User's Watchlist
+        // GET: User's Watchlist
         app.get('/watchlist', verifyFirebaseToken, async (req, res) => {
             const watchlistCollection = client.db("movieMasterDB").collection("watchlist");
             const query = { uid: req.decodedUser.uid };
@@ -196,4 +196,4 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// app.listen(port, () => console.log(`Server running on port ${port}`));
