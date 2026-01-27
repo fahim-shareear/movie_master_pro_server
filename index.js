@@ -114,6 +114,52 @@ async function run() {
             res.send(result);
         });
 
+        // --- WATCHLIST ROUTES ---
+
+        // POST: Add to Watchlist
+        app.post('/watchlist', verifyFirebaseToken, async (req, res) => {
+            const { movieId, movieTitle, moviePoster, movieGenre } = req.body;
+            const uid = req.decodedUser.uid;
+
+            const watchlistCollection = client.db("movieMasterDB").collection("watchlist");
+
+            // Prevent duplicates: Check if user already added this movie
+            const existing = await watchlistCollection.findOne({ uid, movieId });
+            if (existing) {
+                return res.status(400).send({ message: "Already in your watchlist!" });
+            }
+
+            const watchlistItem = {
+                uid,
+                movieId,
+                movieTitle,
+                moviePoster,
+                movieGenre,
+                addedAt: new Date()
+            };
+
+            const result = await watchlistCollection.insertOne(watchlistItem);
+            res.send(result);
+        });
+
+                // GET: User's Watchlist
+        app.get('/watchlist', verifyFirebaseToken, async (req, res) => {
+            const watchlistCollection = client.db("movieMasterDB").collection("watchlist");
+            const query = { uid: req.decodedUser.uid };
+            // Sorting by addedAt so the newest are at the bottom (queue style)
+            const result = await watchlistCollection.find(query).sort({ addedAt: 1 }).toArray();
+            res.send(result);
+        });
+
+        // DELETE: Remove from Watchlist
+        app.delete('/watchlist/:id', verifyFirebaseToken, async (req, res) => {
+            const watchlistCollection = client.db("movieMasterDB").collection("watchlist");
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id), uid: req.decodedUser.uid };
+            const result = await watchlistCollection.deleteOne(query);
+            res.send(result);
+        });
+
         console.log("Database Connected & Routes Restored");
     } finally {}
 }
