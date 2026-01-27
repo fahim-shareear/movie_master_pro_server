@@ -59,6 +59,37 @@ async function run() {
             res.send(result);
         });
 
+        // GET: Advanced Search & Filtering
+        app.get('/movies/search', async (req, res) => {
+            try {
+                const { q, genres, minRating, maxRating } = req.query;
+                let query = {};
+
+                // 1. Text Search (Title)
+                if (q) {
+                    query.title = { $regex: q, $options: 'i' };
+                }
+
+                // 2. Multi-Genre Filter ($in)
+                if (genres) {
+                    const genreArray = genres.split(',');
+                    query.genre = { $in: genreArray };
+                }
+
+                // 3. Rating Range Filter ($gte, $lte)
+                if (minRating || maxRating) {
+                    query.rating = {};
+                    if (minRating) query.rating.$gte = parseFloat(minRating);
+                    if (maxRating) query.rating.$lte = parseFloat(maxRating);
+                }
+
+                const result = await movieCollection.find(query).toArray();
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Search failed" });
+            }
+        });
+
         // Get single movie details (Restored for Details page)
         app.get('/movies/:id', async (req, res) => {
             try {
