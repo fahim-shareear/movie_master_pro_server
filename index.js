@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 // 1. Full CORS Middleware (Now including PATCH)
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://movie-master-pro-82ff4.web.app'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
