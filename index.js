@@ -17,7 +17,8 @@ app.use(cors({
 app.use(express.json());
 
 // 2. Firebase Admin Initialization
-const serviceAccount = require("./movie_master_pro_firebase_sdk.json");
+const decoded = Buffer.from(process.env.FIREBASE_SERVICE_KEY, "base64").toString("utf8");
+const serviceAccount = JSON.parse(decoded);
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
@@ -195,7 +196,7 @@ async function run() {
             res.send(result);
         });
 
-        console.log("Database Connected & Routes Restored");
+        // console.log("Database Connected & Routes Restored");
     } finally {}
 }
 run().catch(console.dir);

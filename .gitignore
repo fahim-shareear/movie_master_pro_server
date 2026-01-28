@@ -3,3 +3,6 @@ node_modules
 movie_master_pro_firebase_sdk.json
 .~lock.B12-A10_category-0018.docx#
 B12-A10_category-0018.docx
+.vercel
+vercel.json
+encode.js
